@@ -4,11 +4,11 @@ import numpy as np
 from argparse import ArgumentParser
 
 #AA
-alphabet_file = "../matrices/alphabet"
+alphabet_file = "../../matrices/alphabet"
 alphabet = np.loadtxt(alphabet_file, dtype=str)
 
 #blosum50: dict in a dict
-blosum_file = "../matrices/BLOSUM50"
+blosum_file = "../../matrices/BLOSUM50"
 _blosum50 = np.loadtxt(blosum_file, dtype=int).T
 blosum50 = {}
 for i, letter_1 in enumerate(alphabet):
@@ -169,7 +169,7 @@ def homology_function(alignment_length, matches):
         return "keep", homology_score
 
 def run_hobohom1(seq_type):
-    filename = "../raw_data/" + seq_type + "_sequences.3line"
+    filename = "../../data/raw_data/" + seq_type + "_sequences.3line"
     # load list
     candidate_sequences, candidate_ids, candidate_topologies = load_sequences(filename)
     print("# Number of elements:", len(candidate_sequences))
