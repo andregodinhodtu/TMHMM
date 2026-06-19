@@ -12,8 +12,9 @@
 
 
 import numpy as np
+import os
 from argparse import ArgumentParser
-from HMM_training import hmm_efficient
+from HMM_training import HMM_efficient
 
 
 # ## Parser
@@ -25,11 +26,13 @@ parser = ArgumentParser(description="Using the Viterbi algorithm to evaluate a H
 parser.add_argument("-eval", action="store", dest="evaluation_file", type=str, help="Input evaluation file")
 parser.add_argument("-hmm", action="store", dest="hmm_file", type=str, help="HMM model file (without path as it is already included in the HMM class)")
 parser.add_argument("-attrib", action="store_true", dest="attribute_states", help="Mode to label states of transition matrix")
+parser.add_argument("-o", action="store", dest="output_dir", type=str, default=".", help="Path to the output directory")
 
 args = parser.parse_args()
 evaluation_file = args.evaluation_file
 hmm_file = args.hmm_file
 attribute_states = args.attribute_states
+output_dir = args.output_dir
 
 
 # ## Import data
@@ -61,7 +64,7 @@ def load_sequences(filepath):
 
 
 eval_sequences, id_sequences, label_sequences = load_sequences(evaluation_file)
-hmm_model = hmm_efficient.load_model(hmm_file)
+hmm_model = HMM_efficient.load_model(hmm_file)
 
 #adapt the load function and type in function of the output of the Baum Welsh algorithm
 transition_matrix = hmm_model.A
@@ -288,5 +291,30 @@ if not attribute_states:
 # In[ ]:
 
 
+if not attribute_states:
+    os.makedirs(output_dir, exist_ok=True)
+    output_filename = os.path.join(output_dir, "viterbi_predictions_detailed.txt")
 
+    with open(output_filename, "w") as out_file:
+        out_file.write("### VITERBI EVALUATION RESULTS ###\n")
+        out_file.write(f"Global Accuracy: {global_accuracy * 100:.2f}%\n")
+        out_file.write("=" * 50 + "\n\n")
+
+        for i, result in enumerate(all_results):
+            seq_id = result["sequence_id"]
+            aa_seq = result["encoded_sequence"] 
+            pred_path = result["predicted_path"]
+            log_prob = result["log_probability"]
+            true_path = label_sequences[i]
+
+            acc = detailed_metrics[i]["accuracy"]
+
+            out_file.write(f">{seq_id} | log_prob: {log_prob:.2f} | accuracy: {acc * 100:.2f}%\n")
+            out_file.write(f"SEQ:  {aa_seq}\n")
+            out_file.write(f"TRUE: {true_path}\n")
+            out_file.write(f"PRED: {pred_path}\n\n")
+
+    print("\n--- Evaluation Complete ---")
+    print(f"Global Accuracy: {global_accuracy * 100:.2f}%")
+    print(f"Detailed results successfully saved to: {output_filename}")
 
