@@ -39,6 +39,10 @@ def load_sequences(filepath):
         ids.append(protein_id)
         sequences.append(sequence)
         topologies.append(topology)
+
+    # Sort by sequence length, longest first (Hobohm 1 requirement)
+    sorted_tuples = sorted(zip(sequences, ids, topologies), key=lambda x: len(x[0]), reverse=True)
+    sequences, ids, topologies = map(list, zip(*sorted_tuples))
     
     return sequences, ids, topologies 
 
@@ -211,7 +215,7 @@ def run_hobohom1(seq_type):
     print("Accepted sequences:", len(accepted_ids))
 
     # Save filtered sequences
-    output_path = "../data/" + seq_type + "_unique.3line"
+    output_path = "../../data/hobohm1_sorted_filtered/" + seq_type + "sorted_unique.3line"
     with open(output_path, "w") as f:
         for pid, seq, top in zip(accepted_ids, accepted_sequences, accepted_topologies):
             f.write(f">{pid}\n{seq}\n{top}\n")
