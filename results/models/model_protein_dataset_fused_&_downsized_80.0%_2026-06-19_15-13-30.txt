@@ -1,0 +1,20 @@
+> Hidden Markov Model: model_protein_dataset_fused_&_downsized_80.0%_2026-06-19_15-13-30.txt
+> Training method: Baum-Welch
+> Alphabet: 123456
+> Number of hidden states: 2
+> Number of symbols: 6
+
+> Initial state probabilities (pi)
+> Shape: (2,)
+state_0	0.516389
+state_1	0.483611
+
+> Transition matrix (A)
+> Shape: (2, 2)
+state_0	0.749326	0.250674
+state_1	0.099130	0.900870
+
+> Emission matrix (B)
+> Shape: (2, 6)
+state_0	0.091045	0.084467	0.116194	0.092737	0.099062	0.516496
+state_1	0.168534	0.167464	0.162927	0.170928	0.163143	0.167005
