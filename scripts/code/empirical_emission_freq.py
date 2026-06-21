@@ -53,6 +53,12 @@ smoothed_counts = count_matrix + pseudocount
 # Because 'P' was never added to the matrix, the sum(axis=1) automatically ignores it!
 probability_matrix = smoothed_counts.div(smoothed_counts.sum(axis=1), axis=0)
 
+
+# add these lines before printing
+pd.set_option("display.max_columns", None)
+pd.set_option("display.width", None)
+pd.set_option("display.float_format", "{:.4f}".format)
+
 # Display the results
 print("=== EMPIRICAL EMISSION PROBABILITY MATRIX (EXCLUDING 'P') ===")
 print(probability_matrix.round(4))
