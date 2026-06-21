@@ -1,0 +1,12 @@
+=== INITIAL STATE FREQUENCIES AT POSITION 0 ===
+  I:   78 (56.93%)
+  O:   14 (10.22%)
+  S:   45 (32.85%)
+
+=== INITIAL STATE FREQUENCIES AT POSITION 1 ===
+  I:   78 (56.93%)
+  O:   14 (10.22%)
+  S:   45 (32.85%)
+
+pi from position 0: {'I': 0.5693, 'O': 0.1022, 'S': 0.3285}
+pi from position 1: {'I': 0.5693, 'O': 0.1022, 'S': 0.3285}
