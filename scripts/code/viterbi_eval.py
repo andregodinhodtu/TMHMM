@@ -15,7 +15,7 @@ import numpy as np
 import os
 import itertools
 from argparse import ArgumentParser
-from HMM_training import HMM_efficient
+from HMM import HMM_BaumWelch, HMM_Gibbs
 
 
 # ## Parser
@@ -25,6 +25,7 @@ from HMM_training import HMM_efficient
 
 parser = ArgumentParser(description="Using the Viterbi algorithm to evaluate a HMM model with already annotated data", add_help=True)
 parser.add_argument("-eval", action="store", dest="evaluation_file", type=str, help="Input evaluation file")
+parser.add_argument("-m", action="store", dest="train_method", choices=["BW", "Gibbs"], default="BW", help="Model training method (BW or Gibbs)")
 parser.add_argument("-hmm", action="store", dest="hmm_file", type=str, help="HMM model file (without path as it is already included in the HMM class)")
 parser.add_argument("-attrib", action="store_true", dest="attribute_states", help="Mode to label states of transition matrix")
 parser.add_argument("-o", action="store", dest="output_dir", type=str, default=".", help="Path to the output directory")
@@ -32,6 +33,7 @@ parser.add_argument("-of", action="store", dest="output_file", type=str, default
 
 args = parser.parse_args()
 evaluation_file = args.evaluation_file
+train_method = args.train_method
 hmm_file = args.hmm_file
 attribute_states = args.attribute_states
 output_dir = args.output_dir
@@ -67,9 +69,12 @@ def load_sequences(filepath):
 
 
 eval_sequences, id_sequences, label_sequences = load_sequences(evaluation_file)
-hmm_model = HMM_efficient.load_model(hmm_file)
 
-#adapt the load function and type in function of the output of the Baum Welsh algorithm
+if train_method == "Gibbs":
+    hmm_model = HMM_Gibbs.load_model(hmm_file)
+else:
+    hmm_model = HMM_BaumWelch.load_model(hmm_file)
+
 transition_matrix = hmm_model.A
 emission_probs = hmm_model.B
 initial_prob = hmm_model.pi
