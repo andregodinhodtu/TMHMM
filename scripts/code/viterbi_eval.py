@@ -315,6 +315,8 @@ if not attribute_states:
 
     # Store the accuracy of each individual sequence
     detailed_metrics = []
+    labels_list = list(best_translation)
+    conf_matrix = {true_state: {pred_state: 0 for pred_state in labels_list} for true_state in labels_list}
 
     for i, result in enumerate(all_results):
         predicted_path = result["predicted_path"]
@@ -325,8 +327,15 @@ if not attribute_states:
             print(f"Warning: Length mismatch for sequence {result['sequence_id']}")
             continue
 
-        seq_correct = sum(1 for p, t in zip(predicted_path, true_path) if p == t)
+        seq_correct = 0
         seq_length = len(predicted_path)
+
+        #filling confusion matric and computing sequence accuracy at once
+        for p, t in zip(predicted_path, true_path):
+            if p == t:
+                seq_correct += 1
+            if t in conf_matrix and p in conf_matrix[t]:
+                conf_matrix[t][p] += 1
 
         # Calculate sequence-level accuracy
         seq_accuracy = seq_correct / seq_length
@@ -374,7 +383,27 @@ if not attribute_states:
             out_file.write(f"TRUE: {true_path}\n")
             out_file.write(f"PRED: {pred_path}\n\n")
 
+    if "." in output_file:
+        base_name, ext = output_file.rsplit(".", 1)
+        conf_filename = f"{base_name}_confmat.{ext}"
+    else:
+        conf_filename = f"{output_file}_confmat.txt"
+
+    conf_filepath = os.path.join(output_dir, conf_filename)
+
+    with open(conf_filepath, "w") as cf:
+        cf.write("### VITERBI CONFUSION MATRIX ###\n")
+        cf.write("Rows: True State | Columns: Predicted State\n\n")
+
+        cf.write("True\\Pred\t" + "\t".join(labels_list) + "\n")
+        for t_state in labels_list:
+            row_str = f"{t_state}\t"
+            for p_state in labels_list:
+                row_str += f"{conf_matrix[t_state][p_state]}\t"
+            cf.write(row_str.strip() + "\n")
+
     print("\n--- Evaluation Complete ---")
     print(f"Global Accuracy: {global_accuracy * 100:.2f}%")
     print(f"Detailed results successfully saved to: {output_filename}")
+    print(f"Confusion matrix successfully saved to: {conf_filepath}")
 
