@@ -13,6 +13,7 @@
 
 import numpy as np
 import os
+import itertools
 from argparse import ArgumentParser
 from HMM_training import HMM_efficient
 
@@ -27,12 +28,14 @@ parser.add_argument("-eval", action="store", dest="evaluation_file", type=str, h
 parser.add_argument("-hmm", action="store", dest="hmm_file", type=str, help="HMM model file (without path as it is already included in the HMM class)")
 parser.add_argument("-attrib", action="store_true", dest="attribute_states", help="Mode to label states of transition matrix")
 parser.add_argument("-o", action="store", dest="output_dir", type=str, default=".", help="Path to the output directory")
+parser.add_argument("-of", action="store", dest="output_file", type=str, default=".", help="Name of the output file")
 
 args = parser.parse_args()
 evaluation_file = args.evaluation_file
 hmm_file = args.hmm_file
 attribute_states = args.attribute_states
 output_dir = args.output_dir
+output_file = args.output_file
 
 
 # ## Import data
@@ -100,7 +103,7 @@ def initialize(encode_sequence, states, initial_prob, transition_matrix, emissio
 # In[2]:
 
 
-def encode( sequence, symbols):
+def encode(sequence, symbols):
 
     enc = [0] * len(sequence)
 
@@ -179,18 +182,68 @@ def optimal_path(input_sequence, sequence_id, delta, arrows, attribute_states=Fa
     else:
         # preparing the output
         path_str = "".join(reversed(path))
-        translate_state = str.maketrans("012", "IMO") # Modify in function of the states
-        final_path = path_str.translate(translate_state)
+        # translate_state = str.maketrans("012", "IMO") # Modify in function of the states
+        # final_path = path_str.translate(translate_state)
 
         output_dict = {
             "sequence_id": sequence_id,
             "encoded_sequence": input_sequence,
             "encoded_path": path_str,
-            "predicted_path": final_path,
+            "predicted_path": None,
             "log_probability": max_value
         }
 
     return(output_dict)
+
+
+# In[ ]:
+
+
+def find_states(summary, bio_labels, label_sequences):
+    """
+    Find optimal attribution of states given by the model with biological labels
+    """
+
+    states_digits = "".join([str(i) for i in range(len(bio_labels))])
+    permutations = [''.join(p) for p in itertools.permutations(bio_labels)]
+
+    best_global_accuracy = 0
+    best_translation = bio_labels
+    perm_results = {}
+
+    for perm in permutations:
+        trans_table = str.maketrans(states_digits, perm)
+
+        current_correct = 0
+        total_aa = 0
+
+        for i, result in enumerate(summary):
+            pred_path = result["encoded_path"].translate(trans_table)
+            true_path = label_sequences[i]
+
+            if len(pred_path) == len(true_path):
+                current_correct += sum(1 for p, t in zip(pred_path, true_path) if p == t)
+                total_aa += len(pred_path)
+
+        acc = current_correct / total_aa if total_aa > 0 else 0
+
+        if acc > best_global_accuracy:
+            best_global_accuracy = acc
+            best_translation = perm
+        print(f"Global accuracy for permutation {perm}: {acc}")
+        # perm_results[perm] = acc
+
+    # perm_results["result"] = best_translation
+    print(f"Best translation table is {states_digits} = {best_translation}, with a global accuracy of {best_global_accuracy}")
+    final_table = str.maketrans(states_digits, best_translation)
+
+    #Translating all encoded path with the best translation table for model evaluation
+    for result in summary:
+        final_path = result["encoded_path"].translate(final_table)
+        result["predicted_path"] = final_path
+
+    return(summary, states_digits, best_translation)
+
 
 
 # ## Initialization
@@ -240,8 +293,9 @@ else:
         seq_id = id_sequences[i]
         input_encode = encode(sequence, symbols)
         delta, arrows = viterbi(input_encode, states, log_initial_prob, log_transition_matrix, log_emission_probs)
-        seq_summary = optimal_path(sequence, seq_id, delta, arrows)
+        seq_summary = optimal_path(sequence, seq_id, delta, arrows)       
         all_results.append(seq_summary)
+    all_results, states_digits, best_translation = find_states(all_results, "SIMO", label_sequences)
 
 
 
@@ -272,7 +326,7 @@ if not attribute_states:
         # Calculate sequence-level accuracy
         seq_accuracy = seq_correct / seq_length
 
-        # Update global counters
+        # Update global counters (now redundant with the find_states function, but still better to keep this for understanding the logic)
         total_amino_acids += seq_length
         global_correct_predictions += seq_correct
 
@@ -293,11 +347,12 @@ if not attribute_states:
 
 if not attribute_states:
     os.makedirs(output_dir, exist_ok=True)
-    output_filename = os.path.join(output_dir, "viterbi_predictions_detailed.txt")
+    output_filename = os.path.join(output_dir, output_file)
 
     with open(output_filename, "w") as out_file:
         out_file.write("### VITERBI EVALUATION RESULTS ###\n")
         out_file.write(f"Global Accuracy: {global_accuracy * 100:.2f}%\n")
+        out_file.write(f"Translation Table used: {states_digits} -> {best_translation}\n")
         out_file.write("=" * 50 + "\n\n")
 
         for i, result in enumerate(all_results):
