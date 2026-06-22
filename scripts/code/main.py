@@ -9,8 +9,8 @@ def main():
     """
     
     # Configuration
-    fasta_path = "/home/lunsusa/dtu/algorithms/project/TMHMM/data/train_test_data/hobohm1_ole_formula/default/train_dataset_fused_80.0%.txt"
-    file = "fused"
+    fasta_path = "/home/lunsusa/dtu/algorithms/project/TMHMM/data/train_test_data/hobohm1_ole_formula/downsized/train_dataset_fused_&_downsized_80.0%.txt"
+    file = "downsized"
     alphabet = "ACDEFGHIKLMNPQRSTVWY"
     n_states = 4  # S, I, M, O
     max_iter = 500
