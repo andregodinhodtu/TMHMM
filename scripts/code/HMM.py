@@ -51,9 +51,7 @@ def parse_fasta(filepath, alphabet="ACDEFGHIKLMNPQRSTVWY"):
     filepath : str
         Path to the fasta file.
     alphabet : str
-        Valid amino acid symbols. Sequences containing other characters
-        (e.g. X) will be filtered out.
-
+        Valid amino acid symbols. 
     Returns
     -------
     sequences : list of list of int
@@ -68,7 +66,7 @@ def parse_fasta(filepath, alphabet="ACDEFGHIKLMNPQRSTVWY"):
     labels = []
     headers = []
 
-    label_map = {"S": 0, "I": 1, "M": 2, "B": 3, "P": 4, "O": 5}
+    label_map = {"S": 0, "I": 1, "M": 2, "O": 5}
     char_to_idx = {char: i for i, char in enumerate(alphabet)}
 
     with open(filepath, "r") as f:
@@ -78,8 +76,8 @@ def parse_fasta(filepath, alphabet="ACDEFGHIKLMNPQRSTVWY"):
     while i < len(lines):
         if lines[i].startswith(">"):
             header = lines[i][1:]  # strip >
-            seq = lines[i+1].strip()
-            lab = lines[i+2].strip()
+            seq = lines[i+1][1:] #remove first aminoacid M
+            lab = lines[i+2][1:] # and first label
 
             # filter out sequences with unknown characters
             if all(c in alphabet for c in seq) and len(seq) == len(lab):
@@ -190,7 +188,7 @@ class HMM: # not usable by itself
             Path to the output file.
         """
 
-        output_default_path = "../../results/models/" + output_filename
+        output_default_path = "/home/lunsusa/dtu/algorithms/project/TMHMM/results/models/" + output_filename
 
         with open(output_default_path, "w") as f:
             f.write(f"> Hidden Markov Model: {output_filename}\n")
