@@ -1,4 +1,5 @@
 ### VITERBI EVALUATION RESULTS ###
+Model evaluated: hmm_gibbs_20260622_193613_downsized_500.txt
 Global Accuracy: 50.04%
 Translation Table used: 0123 -> SIMO
 ==================================================

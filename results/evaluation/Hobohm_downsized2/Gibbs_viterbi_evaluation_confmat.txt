@@ -1,4 +1,5 @@
 ### VITERBI CONFUSION MATRIX ###
+Model evaluated: hmm_gibbs_20260622_193613_downsized_500.txt
 Rows: True State | Columns: Predicted State
 
 True\Pred	S	I	M	O
