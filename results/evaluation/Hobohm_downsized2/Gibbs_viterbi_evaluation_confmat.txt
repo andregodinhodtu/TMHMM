@@ -1,0 +1,8 @@
+### VITERBI CONFUSION MATRIX ###
+Rows: True State | Columns: Predicted State
+
+True\Pred	S	I	M	O
+S	40	33	150	55
+I	24	1084	44	953
+M	151	36	451	49
+O	49	776	106	855

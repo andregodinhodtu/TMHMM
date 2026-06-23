@@ -1,0 +1,9 @@
+### VITERBI CONFUSION MATRIX ###
+Model evaluated: hmm_baum_welch_20260622_193613_downsized_500.txt
+Rows: True State | Columns: Predicted State
+
+True\Pred	O	I	M	S
+O	1215	371	123	77
+I	491	1157	38	419
+M	55	23	582	27
+S	27	21	167	63
