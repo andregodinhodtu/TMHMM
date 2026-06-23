@@ -192,7 +192,7 @@ def optimal_path(input_sequence, sequence_id, delta, arrows, attribute_states=Fa
 
         output_dict = {
             "sequence_id": sequence_id,
-            "encoded_sequence": input_sequence,
+            "input_sequence": input_sequence,
             "encoded_path": path_str,
             "predicted_path": None,
             "log_probability": max_value
@@ -317,9 +317,11 @@ if not attribute_states:
     detailed_metrics = []
     labels_list = list(best_translation)
     conf_matrix = {true_state: {pred_state: 0 for pred_state in labels_list} for true_state in labels_list}
+    aa_metrics = {aa: {"correct": 0, "total": 0} for aa in symbols}
 
     for i, result in enumerate(all_results):
         predicted_path = result["predicted_path"]
+        aa_seq = result["input_sequence"]
         true_path = label_sequences[i]
 
         # Sanity check: Ensure paths have the exact same length
@@ -330,10 +332,12 @@ if not attribute_states:
         seq_correct = 0
         seq_length = len(predicted_path)
 
-        #filling confusion matric and computing sequence accuracy at once
-        for p, t in zip(predicted_path, true_path):
+        #filling confusion matrices and computing sequence accuracy at once
+        for aa, p, t in zip(aa_seq, predicted_path, true_path):
+            aa_metrics[aa]["total"] += 1
             if p == t:
                 seq_correct += 1
+                aa_metrics[aa]["correct"] += 1
             if t in conf_matrix and p in conf_matrix[t]:
                 conf_matrix[t][p] += 1
 
@@ -365,13 +369,14 @@ if not attribute_states:
 
     with open(output_filename, "w") as out_file:
         out_file.write("### VITERBI EVALUATION RESULTS ###\n")
+        out_file.write(f"Model evaluated: {hmm_file}\n")
         out_file.write(f"Global Accuracy: {global_accuracy * 100:.2f}%\n")
         out_file.write(f"Translation Table used: {states_digits} -> {best_translation}\n")
         out_file.write("=" * 50 + "\n\n")
 
         for i, result in enumerate(all_results):
             seq_id = result["sequence_id"]
-            aa_seq = result["encoded_sequence"] 
+            aa_seq = result["input_sequence"] 
             pred_path = result["predicted_path"]
             log_prob = result["log_probability"]
             true_path = label_sequences[i]
@@ -386,13 +391,18 @@ if not attribute_states:
     if "." in output_file:
         base_name, ext = output_file.rsplit(".", 1)
         conf_filename = f"{base_name}_confmat.{ext}"
+        aa_filename = f"{base_name}_aa_accuracy.tsv"
     else:
         conf_filename = f"{output_file}_confmat.txt"
+        aa_filename = f"{output_file}_aa_accuracy.tsv"
 
     conf_filepath = os.path.join(output_dir, conf_filename)
+    aa_filepath = os.path.join(output_dir, aa_filename)
 
+    # Writing the file with states confusion matrix
     with open(conf_filepath, "w") as cf:
         cf.write("### VITERBI CONFUSION MATRIX ###\n")
+        cf.write(f"Model evaluated: {hmm_file}\n")
         cf.write("Rows: True State | Columns: Predicted State\n\n")
 
         cf.write("True\\Pred\t" + "\t".join(labels_list) + "\n")
@@ -402,8 +412,21 @@ if not attribute_states:
                 row_str += f"{conf_matrix[t_state][p_state]}\t"
             cf.write(row_str.strip() + "\n")
 
+
+    # Writing the file with per-AA accuracy scores
+    with open(aa_filepath, "w") as af:
+        af.write("Amino_Acid\tTotal_Count\tCorrect_Predictions\tAccuracy\n")
+
+        for aa in sorted(symbols):
+            total = aa_metrics[aa]["total"]
+            correct = aa_metrics[aa]["correct"]
+            acc = (correct / total) if total > 0 else 0
+
+            af.write(f"{aa}\t{total}\t{correct}\t{acc * 100:.2f}%\n")
+
     print("\n--- Evaluation Complete ---")
     print(f"Global Accuracy: {global_accuracy * 100:.2f}%")
     print(f"Detailed results successfully saved to: {output_filename}")
     print(f"Confusion matrix successfully saved to: {conf_filepath}")
+    print(f"Amino Acid accuracies successfully saved to: {aa_filepath}")
 

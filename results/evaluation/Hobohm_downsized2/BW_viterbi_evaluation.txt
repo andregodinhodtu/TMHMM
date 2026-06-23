@@ -1,4 +1,5 @@
 ### VITERBI EVALUATION RESULTS ###
+Model evaluated: hmm_baum_welch_20260622_193613_downsized_500.txt
 Global Accuracy: 62.13%
 Translation Table used: 0123 -> OIMS
 ==================================================
