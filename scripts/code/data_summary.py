@@ -5,15 +5,15 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-RAW_DIR = "../../data/raw_data"
-OUT_DIR = "../../results/data_summary"
+RAW_DIR = "/home/lunsusa/dtu/algorithms/project/TMHMM/data/hobohm1_filtered"
+OUT_DIR = "/home/lunsusa/dtu/algorithms/project/TMHMM/results/data_summary/hobohm"
 
 # Classes 
 CLASS_FILES = {
-    "GLOBULAR": "GLOBULAR_sequences.3line",
-    "SIGNAL":   "SIGNAL_sequences.3line",
-    "SP+TM":    "SP+TM_sequences.3line",
-    "TM":       "TM_sequences.3line",
+    "GLOBULAR": "GLOBULAR_unique.3line",
+    "SIGNAL":   "SIGNAL_unique.3line",
+    "SP+TM":    "SP+TM_unique.3line",
+    "TM":       "TM_unique.3line",
 }
 
 STATE_NAME = {"S": "Signal peptide", "I": "Inside", "M": "Membrane", "O": "Outside"}
@@ -164,6 +164,7 @@ def main():
     for xi, c in zip(x, counts):
         plt.text(xi, c, str(c), ha="center", va="bottom")
 
+   # plt.axhline(y=50, color="black", linestyle="--", linewidth=1.2, label="Downsizing threshold")
     plt.xticks(x, names)
     plt.ylabel("Number of sequences")
     plt.title("Sequences per topology class, colored by residue-state composition", pad=15)
