@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from HMM import HMM_BaumWelch, HMM_Gibbs, parse_fasta
+from HMM import HMM_BaumWelch, HMM_Gibbs, parse_fasta, strip_first_residue
 from datetime import datetime
 import sys
 
@@ -25,6 +25,7 @@ def main():
     # Load sequences and labels
     print(f"\nLoading sequences from {fasta_path}...")
     sequences, labels, headers = parse_fasta(fasta_path, alphabet=alphabet)
+    sequences, labels, headers = strip_first_residue(sequences, labels, headers)
     
     if len(sequences) == 0:
         print("ERROR: No sequences loaded. Check file path and format.")
