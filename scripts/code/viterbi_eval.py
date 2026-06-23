@@ -403,6 +403,7 @@ if not attribute_states:
     with open(conf_filepath, "w") as cf:
         cf.write("### VITERBI CONFUSION MATRIX ###\n")
         cf.write(f"Model evaluated: {hmm_file}\n")
+        cf.write(f"Global Accuracy: {global_accuracy * 100:.2f}%\n")
         cf.write("Rows: True State | Columns: Predicted State\n\n")
 
         cf.write("True\\Pred\t" + "\t".join(labels_list) + "\n")

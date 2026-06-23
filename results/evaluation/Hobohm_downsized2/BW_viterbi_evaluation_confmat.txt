@@ -1,5 +1,6 @@
 ### VITERBI CONFUSION MATRIX ###
 Model evaluated: hmm_baum_welch_20260622_193613_downsized_500.txt
+Global Accuracy: 62.13%
 Rows: True State | Columns: Predicted State
 
 True\Pred	O	I	M	S

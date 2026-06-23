@@ -1,0 +1,10 @@
+### VITERBI CONFUSION MATRIX ###
+Model evaluated: hmm_gibbs_20260623_121040_downsized_200_E.txt
+Global Accuracy: 65.65%
+Rows: True State | Columns: Predicted State
+
+True\Pred	I	M	O	S
+I	1580	60	416	49
+M	53	634	0	0
+O	796	148	842	0
+S	39	63	44	132
