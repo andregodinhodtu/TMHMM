@@ -76,8 +76,8 @@ def parse_fasta(filepath, alphabet="ACDEFGHIKLMNPQRSTVWY"):
     while i < len(lines):
         if lines[i].startswith(">"):
             header = lines[i][1:]  # strip >
-            seq = lines[i+1][1:] #remove first aminoacid M
-            lab = lines[i+2][1:] # and first label
+            seq = lines[i+1].strip()
+            lab = lines[i+2].strip()
 
             # filter out sequences with unknown characters
             if all(c in alphabet for c in seq) and len(seq) == len(lab):
@@ -91,6 +91,19 @@ def parse_fasta(filepath, alphabet="ACDEFGHIKLMNPQRSTVWY"):
 
     print(f"Parsed {len(sequences)} valid sequences")
     return sequences, labels, headers
+
+
+# tiny remove first aminoacid helper
+def strip_first_residue(sequences, labels, headers):
+    """
+    Removes the first position (amino acid + label) from every sequence.
+    Used because the initiator methionine is always M and always Inside,
+    so it adds no topology information and biases the model.
+    """
+    stripped_seqs  = [s[1:] for s in sequences]
+    stripped_labs  = [l[1:] for l in labels]
+    return stripped_seqs, stripped_labs, headers
+
 
 
 # shared base class
