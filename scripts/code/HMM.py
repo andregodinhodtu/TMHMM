@@ -1,6 +1,7 @@
 
-
+import os
 import numpy as np
+
 
 # module helpers
 
@@ -41,56 +42,6 @@ def encode(sequence,alphabet):
             raise ValueError(f"Sequence contains character not found in alphabet: {e}")
 
         return enc
-
-def parse_fasta(filepath, alphabet="ACDEFGHIKLMNPQRSTVWY"):
-    """
-    Parses a DeepTMHMM fasta file into sequences and labels.
-
-    Parameters
-    ----------
-    filepath : str
-        Path to the fasta file.
-    alphabet : str
-        Valid amino acid symbols. 
-    Returns
-    -------
-    sequences : list of list of int
-        Encoded amino acid sequences.
-    labels : list of list of int
-        Corresponding encoded state label sequences.
-    headers : list of str
-        Protein identifiers.
-    """
-
-    sequences = []
-    labels = []
-    headers = []
-
-    label_map = {"S": 0, "I": 1, "M": 2, "O": 5}
-    char_to_idx = {char: i for i, char in enumerate(alphabet)}
-
-    with open(filepath, "r") as f:
-        lines = f.read().splitlines()
-
-    i = 0
-    while i < len(lines):
-        if lines[i].startswith(">"):
-            header = lines[i][1:]  # strip >
-            seq = lines[i+1].strip()
-            lab = lines[i+2].strip()
-
-            # filter out sequences with unknown characters
-            if all(c in alphabet for c in seq) and len(seq) == len(lab):
-                headers.append(header)
-                sequences.append([char_to_idx[c] for c in seq])
-                labels.append([label_map[c] for c in lab])
-
-            i += 3
-        else:
-            i += 1
-
-    print(f"Parsed {len(sequences)} valid sequences")
-    return sequences, labels, headers
 
 
 # tiny remove first aminoacid helper
@@ -146,12 +97,16 @@ class HMM: # not usable by itself
         self.n_symbols = len(set(alphabet))
 
         self.pi = np.random.dirichlet(np.ones(self.n_states))
+
         self.A  = np.random.dirichlet(np.ones(self.n_states), size=self.n_states)
         self.B  = np.random.dirichlet(np.ones(self.n_symbols), size=self.n_states)
 
         # set by forward()
         self.alpha   = None
         self.G_alpha = None
+
+        
+
 
 
 
@@ -200,8 +155,8 @@ class HMM: # not usable by itself
         output_filename : str
             Path to the output file.
         """
-
-        output_default_path = "/home/lunsusa/dtu/algorithms/project/TMHMM/results/models/" + output_filename
+        repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+        output_default_path = repo_root + "/results/models/" + output_filename
 
         with open(output_default_path, "w") as f:
             f.write(f"> Hidden Markov Model: {output_filename}\n")
@@ -638,12 +593,6 @@ class HMM_Gibbs(HMM):
 
         for iteration in range(max_iter):
 
-            # E-step (stochastic): sample one path per sequence
-            all_paths = [self._sample_path(enc) for enc in sequences]
-
-            # M-step: count over sampled paths
-            self._update_parameters(all_paths, sequences)
-
             # Log-likelihood (requires another forward pass on updated params)
             log_likelihood = 0
             for enc in sequences:
@@ -660,6 +609,12 @@ class HMM_Gibbs(HMM):
                 if abs(curr_avg - prev_avg) < epsilon:
                     print(f"Converged at iteration {iteration + 1}")
                     break
+
+            # E-step (stochastic): sample one path per sequence
+            all_paths = [self._sample_path(enc) for enc in sequences]
+
+            # M-step: count over sampled paths
+            self._update_parameters(all_paths, sequences)
 
         return self.log_likelihoods
 
