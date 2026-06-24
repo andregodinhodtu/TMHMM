@@ -99,8 +99,7 @@ def main():
 
   
     # Convergence figure (for poster)
-    
-    fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharey=False)
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4), sharey=True)
 
     axes[0].plot(range(1, len(bw_lls)), bw_lls[1:], color="#4C72B0", linewidth=1.5)
     axes[0].set_title("Baum-Welch (exact EM)", fontsize=13)
@@ -116,7 +115,6 @@ def main():
     axes[1].plot(range(1, len(gibbs_lls)), gibbs_lls[1:], color="#C44E52", linewidth=1.5)
     axes[1].set_title("Gibbs sampling (stochastic EM)", fontsize=13)
     axes[1].set_xlabel("Iteration", fontsize=11)
-    axes[1].set_ylabel("Training log-likelihood", fontsize=11)
     axes[1].annotate(
         f"Converged: {len(gibbs_lls)} iterations\nFinal LL: {gibbs_lls[-1]:.1f}",
         xy=(len(gibbs_lls), gibbs_lls[-1]),
