@@ -1,0 +1,6 @@
+split,class,n_sequences,n_residues,length_min,length_mean,length_median,length_max,pct_S,pct_I,pct_M,pct_O
+all,GLOBULAR,50,7124,51,142.5,133,384,0.0,100.0,0.0,0.0
+all,SIGNAL,50,5431,52,108.6,92,221,20.27,0.0,0.0,79.73
+all,SP+TM,7,2057,148,293.9,262,589,8.46,13.66,19.15,58.73
+all,TM,66,8806,53,133.4,105,399,0.0,41.27,33.98,24.76
+all,ALL,173,23418,51,135.4,111,589,5.44,47.14,14.46,32.96
